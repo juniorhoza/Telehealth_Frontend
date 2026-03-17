@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
 import { Mail, Phone, Calendar } from "lucide-react";
 import { useState } from "react";
@@ -32,14 +38,17 @@ export function CoachInfo() {
               DR
             </div>
             <div>
-              <h3 className="font-semibold text-lg text-[#4A5A3A]">Dr. Rachel Davis</h3>
+              <h3 className="font-semibold text-lg text-[#4A5A3A]">
+                Dr. Rachel Davis
+              </h3>
               <p className="text-sm text-gray-600">Certified Wellness Coach</p>
             </div>
           </div>
 
           <div className="space-y-2 text-sm">
             <p className="text-gray-700">
-              Specializing in holistic health, nutrition, and fitness coaching with 10+ years of experience.
+              Specializing in holistic health, nutrition, and fitness coaching
+              with 10+ years of experience.
             </p>
           </div>
 
@@ -68,7 +77,7 @@ export function CoachInfo() {
             </div>
           )}
 
-          <Button 
+          <Button
             className="w-full bg-[#6B7C4E] hover:bg-[#5A6B3E] gap-2"
             onClick={handleScheduleAppointment}
           >

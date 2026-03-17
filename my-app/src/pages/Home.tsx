@@ -55,7 +55,7 @@ export function HomePage() {
           // --- STEP 1: INITIAL LOGIN (Check Email/Password) ---
           // FIX: Change 'verify-otp' to 'login' here
           const response = await fetch(
-            "http://127.0.0.1:8000/v1/api/auth/login/",
+            "http://127.0.0.1:8000/v1/api/authentication/login/",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -75,7 +75,7 @@ export function HomePage() {
         } else {
           // --- STEP 2: VERIFY OTP (Final Token Exchange) ---
           const response = await fetch(
-            "http://127.0.0.1:8000/v1/api/auth/verify-otp/",
+            "http://127.0.0.1:8000/v1/api/authentication/verify-otp/",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

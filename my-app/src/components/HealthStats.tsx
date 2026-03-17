@@ -2,15 +2,25 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Activity, Scale, Ruler } from "lucide-react";
 
+interface HealthTrackingEntry {
+  uuid: string;
+  metric_type: string;
+  value_numeric?: number | string | null;
+  value_systolic?: number | null;
+  value_diastolic?: number | null;
+  medication_taken?: boolean | null;
+  unit?: string;
+}
+
 interface HealthStatsData {
   weight_kg?: number | string;
-  bmi?: number | string;
+  adherence?: string;
   blood_pressure?: string;
 }
 
 const FALLBACK_STATS: HealthStatsData = {
   weight_kg: "--",
-  bmi: "N/A",
+  adherence: "N/A",
   blood_pressure: "--",
 };
 
@@ -23,7 +33,7 @@ export function HealthStats() {
 
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/v1/api/health-tracking/",
+          "http://127.0.0.1:8000/v1/api/health-tracking/summary/",
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -35,30 +45,38 @@ export function HealthStats() {
           return;
         }
 
-        const data = await res.json();
+        const data: HealthTrackingEntry[] = await res.json();
 
-        if (Array.isArray(data) && data.length > 0) {
-          const latest = data[0];
-
-          setStats({
-            weight_kg: latest.value_numeric ?? "--",
-            bmi: latest.bmi ?? "N/A",
-            blood_pressure:
-              latest.value_systolic && latest.value_diastolic
-                ? `${latest.value_systolic}/${latest.value_diastolic}`
-                : "--",
-          });
-        } else if (data && typeof data === "object") {
-          setStats({
-            weight_kg: data.weight_kg ?? data.value_numeric ?? "--",
-            bmi: data.bmi ?? "N/A",
-            blood_pressure:
-              data.blood_pressure ??
-              (data.value_systolic && data.value_diastolic
-                ? `${data.value_systolic}/${data.value_diastolic}`
-                : "--"),
-          });
+        if (!Array.isArray(data)) {
+          console.error("Unexpected health stats response:", data);
+          return;
         }
+
+        const weightEntry = data.find(
+          (entry) => entry.metric_type === "WEIGHT",
+        );
+        const bpEntry = data.find((entry) => entry.metric_type === "BP");
+        const adherenceEntry = data.find(
+          (entry) => entry.metric_type === "ADHERENCE",
+        );
+
+        setStats({
+          weight_kg: weightEntry?.value_numeric ?? "--",
+          adherence:
+            adherenceEntry?.medication_taken === true ||
+            Number(adherenceEntry?.value_numeric) === 1
+              ? "Taken"
+              : adherenceEntry?.medication_taken === false ||
+                  Number(adherenceEntry?.value_numeric) === 0
+                ? "Missed"
+                : "N/A",
+          blood_pressure:
+            bpEntry?.value_systolic != null && bpEntry?.value_diastolic != null
+              ? `${bpEntry.value_systolic}/${bpEntry.value_diastolic}`
+              : bpEntry?.value_numeric != null
+                ? `${bpEntry.value_numeric} ${bpEntry.unit ?? ""}`.trim()
+                : "--",
+        });
       } catch (err) {
         console.error("Health stats fetch failed:", err);
       }
@@ -76,7 +94,9 @@ export function HealthStats() {
           </div>
           <div>
             <p className="text-sm text-gray-500">Weight</p>
-            <p className="text-xl font-bold">{stats.weight_kg} kg</p>
+            <p className="text-xl font-bold">
+              {stats.weight_kg !== "--" ? `${stats.weight_kg} kg` : "--"}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -87,8 +107,8 @@ export function HealthStats() {
             <Activity className="w-6 h-6 text-emerald-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">BMI</p>
-            <p className="text-xl font-bold">{stats.bmi}</p>
+            <p className="text-sm text-gray-500">Medication Adherence</p>
+            <p className="text-xl font-bold">{stats.adherence}</p>
           </div>
         </CardContent>
       </Card>

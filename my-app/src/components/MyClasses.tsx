@@ -41,11 +41,11 @@ export function MyClasses() {
     <div className="space-y-2">
       {enrollments.map((e) => (
         <div
-          key={e.enrollment_uuid}
+          key={e.enrollment_uuid || e.uuid}
           className="p-3 bg-white rounded-lg border flex justify-between items-center"
         >
           <span className="text-sm font-medium">
-            {e.program?.name || "Wellness Class"}
+            {e.program?.title || e.program?.name || "Wellness Class"}
           </span>
           <span className="text-[10px] bg-[#E8F0DC] px-2 py-1 rounded text-[#6B7C4E]">
             {e.status || "Enrolled"}

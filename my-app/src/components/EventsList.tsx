@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -19,7 +19,15 @@ interface Event {
   instructor: string;
   spots: number;
   enrolled: boolean;
+  enrollmentUuid?: string | null;
 }
+
+const API_BASE = "http://127.0.0.1:8000/v1/api";
+
+// Keep these easy to swap if your backend uses slightly different paths
+const ENROLL_CREATE_URL = `${API_BASE}/my-enrollments/`; // POST
+const ENROLL_DELETE_URL = (enrollmentUuid: string) =>
+  `${API_BASE}/my-enrollments/${enrollmentUuid}/`; // DELETE
 
 const MOCK_EVENTS: Event[] = [
   {
@@ -86,80 +94,174 @@ const MOCK_EVENTS: Event[] = [
 
 export function EventsList() {
   const [events, setEvents] = useState<Event[]>(MOCK_EVENTS);
+  const [loading, setLoading] = useState(true);
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
+
+  const token = localStorage.getItem("token");
+
+  const authHeaders: HeadersInit = token
+    ? {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    : {
+        "Content-Type": "application/json",
+      };
+
+  const mapProgramsAndEnrollments = useCallback(
+    (programs: any[], enrollments: any[]): Event[] => {
+      const enrollmentMap = new Map<string, any>();
+
+      for (const enrollment of enrollments || []) {
+        const programUuid =
+          enrollment?.program_uuid ||
+          enrollment?.program?.uuid ||
+          enrollment?.program?.id ||
+          enrollment?.program_id;
+
+        if (programUuid) {
+          enrollmentMap.set(String(programUuid), enrollment);
+        }
+      }
+
+      return programs.map((program: any, index: number) => {
+        const programId = String(
+          program?.uuid ?? program?.id ?? program?.program_uuid ?? index + 1,
+        );
+
+        const matchingEnrollment = enrollmentMap.get(programId);
+
+        return {
+          id: programId,
+          title: program?.title || program?.name || "Community Wellness Class",
+          type: String(program?.type || program?.category || "")
+            .toLowerCase()
+            .includes("cook")
+            ? "cooking"
+            : "fitness",
+          date: program?.date || program?.start_date || "2026-03-17",
+          time: program?.time || program?.start_time || "TBD",
+          instructor:
+            program?.instructor ||
+            program?.coach_name ||
+            program?.teacher ||
+            "Community Staff",
+          spots:
+            typeof program?.spots === "number"
+              ? program.spots
+              : typeof program?.capacity === "number"
+                ? program.capacity
+                : 10,
+          enrolled: Boolean(matchingEnrollment),
+          enrollmentUuid:
+            matchingEnrollment?.enrollment_uuid ||
+            matchingEnrollment?.uuid ||
+            null,
+        };
+      });
+    },
+    [],
+  );
+
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const [programsRes, enrollmentsRes] = await Promise.all([
+        fetch(`${API_BASE}/programs/`, { headers: authHeaders }),
+        fetch(`${API_BASE}/my-enrollments/`, { headers: authHeaders }),
+      ]);
+
+      if (!programsRes.ok) {
+        console.error(
+          `Programs fetch failed with status ${programsRes.status}`,
+        );
+        setEvents(MOCK_EVENTS);
+        setLoading(false);
+        return;
+      }
+
+      const programsData = await programsRes.json();
+      const enrollmentsData = enrollmentsRes.ok
+        ? await enrollmentsRes.json()
+        : [];
+
+      if (Array.isArray(programsData) && programsData.length > 0) {
+        const mapped = mapProgramsAndEnrollments(
+          programsData,
+          Array.isArray(enrollmentsData) ? enrollmentsData : [],
+        );
+        setEvents(mapped);
+      } else {
+        setEvents(MOCK_EVENTS);
+      }
+    } catch (err) {
+      console.error(
+        "Programs/enrollments fetch failed, using mock events.",
+        err,
+      );
+      setEvents(MOCK_EVENTS);
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders, mapProgramsAndEnrollments]);
 
   useEffect(() => {
-    const fetchPrograms = async () => {
-      const token = localStorage.getItem("token");
+    fetchEvents();
+  }, [fetchEvents]);
 
-      try {
-        const res = await fetch("http://127.0.0.1:8000/v1/api/programs/", {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
+  const handleSignup = async (eventId: string) => {
+    const targetEvent = events.find((event) => event.id === eventId);
+    if (!targetEvent) return;
 
-        if (!res.ok) {
-          console.error(`Programs fetch failed with status ${res.status}`);
-          setEvents(MOCK_EVENTS);
+    setSubmittingId(eventId);
+
+    try {
+      if (targetEvent.enrolled) {
+        if (!targetEvent.enrollmentUuid) {
+          console.error("Missing enrollment UUID for cancellation.");
           return;
         }
 
-        const data = await res.json();
+        const cancelRes = await fetch(
+          ENROLL_DELETE_URL(targetEvent.enrollmentUuid),
+          {
+            method: "DELETE",
+            headers: authHeaders,
+          },
+        );
 
-        if (Array.isArray(data) && data.length > 0) {
-          const mappedEvents: Event[] = data.map(
-            (program: any, index: number) => ({
-              id: String(program.id ?? index + 1),
-              title:
-                program.title || program.name || "Community Wellness Class",
-              type: String(program.type || program.category || "")
-                .toLowerCase()
-                .includes("cook")
-                ? "cooking"
-                : "fitness",
-              date: program.date || program.start_date || "2026-03-17",
-              time: program.time || program.start_time || "TBD",
-              instructor:
-                program.instructor ||
-                program.coach_name ||
-                program.teacher ||
-                "Community Staff",
-              spots:
-                typeof program.spots === "number"
-                  ? program.spots
-                  : typeof program.capacity === "number"
-                    ? program.capacity
-                    : 10,
-              enrolled: Boolean(program.enrolled),
-            }),
+        if (!cancelRes.ok) {
+          const errorText = await cancelRes.text();
+          console.error(
+            "Cancel enrollment failed:",
+            cancelRes.status,
+            errorText,
           );
-
-          setEvents(mappedEvents);
-        } else {
-          setEvents(MOCK_EVENTS);
+          return;
         }
-      } catch (err) {
-        console.error("Programs fetch failed, using mock events.", err);
-        setEvents(MOCK_EVENTS);
+      } else {
+        const createRes = await fetch(ENROLL_CREATE_URL, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({
+            program_uuid: eventId,
+          }),
+        });
+
+        if (!createRes.ok) {
+          const errorText = await createRes.text();
+          console.error("Enrollment failed:", createRes.status, errorText);
+          return;
+        }
       }
-    };
 
-    fetchPrograms();
-  }, []);
-
-  const handleSignup = async (eventId: string) => {
-    const token = localStorage.getItem("token");
-    const targetEvent = events.find((event) => event.id === eventId);
-
-    setEvents(
-      events.map((event) =>
-        event.id === eventId
-          ? {
-              ...event,
-              enrolled: !event.enrolled,
-              spots: event.enrolled ? event.spots + 1 : event.spots - 1,
-            }
-          : event,
-      ),
-    );
+      await fetchEvents();
+    } catch (error) {
+      console.error("Enrollment action failed:", error);
+    } finally {
+      setSubmittingId(null);
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -232,15 +334,22 @@ export function EventsList() {
                     : "hover:bg-[#E8F0DC] hover:text-[#4A5A3A] hover:border-[#6B7C4E]"
                 }
                 variant={event.enrolled ? "default" : "outline"}
-                disabled={event.spots === 0 && !event.enrolled}
+                disabled={
+                  submittingId === event.id ||
+                  (event.spots === 0 && !event.enrolled)
+                }
               >
                 {event.enrolled ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Enrolled - Click to Cancel
+                    {submittingId === event.id
+                      ? "Updating..."
+                      : "Enrolled - Click to Cancel"}
                   </>
                 ) : event.spots === 0 ? (
                   "Class Full"
+                ) : submittingId === event.id ? (
+                  "Signing Up..."
                 ) : (
                   "Sign Up"
                 )}

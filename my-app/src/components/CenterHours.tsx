@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Clock, MapPin } from "lucide-react";
 
 export function CenterHours() {
@@ -21,8 +27,13 @@ export function CenterHours() {
       <CardContent className="space-y-4">
         <div className="space-y-3">
           {hours.map((schedule) => (
-            <div key={schedule.day} className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">{schedule.day}</span>
+            <div
+              key={schedule.day}
+              className="flex justify-between items-center"
+            >
+              <span className="text-sm font-medium text-gray-700">
+                {schedule.day}
+              </span>
               <span className="text-sm text-gray-600 flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {schedule.time}
@@ -38,16 +49,20 @@ export function CenterHours() {
           >
             <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-gray-900">Community Wellness Hub</p>
+              <p className="font-medium text-gray-900">
+                Community Wellness Hub
+              </p>
               <p>123 Main Street</p>
-              <p>Your Town, ST 12345</p>
+              <p>Tallahassee, FL 32307</p>
             </div>
           </button>
         </div>
 
         <div className="pt-4 border-t">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <p className="text-sm font-medium text-yellow-900 mb-1">Holiday Hours</p>
+            <p className="text-sm font-medium text-yellow-900 mb-1">
+              Holiday Hours
+            </p>
             <p className="text-sm text-yellow-700">
               Special hours during holidays. Check our calendar for updates.
             </p>
