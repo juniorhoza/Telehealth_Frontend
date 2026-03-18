@@ -51,7 +51,7 @@ export function HomePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
+    try { 
       if (isLogin) {
         if (!otpStep) {
           // --- STEP 1: INITIAL LOGIN (Check Email/Password) ---
