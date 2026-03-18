@@ -28,6 +28,7 @@ import {
   Info,
   Home,
   Check,
+  Linkedin,
 } from "lucide-react";
 
 export function HomePage() {
@@ -48,6 +49,36 @@ export function HomePage() {
   const [otpStep, setOtpStep] = useState(false); // Flag for the OTP input
   const [otpUuid, setOtpUuid] = useState(""); // Stores the UUID from the login response
   const [otpCode, setOtpCode] = useState(""); // Stores the 6-digit code the user types
+  const foundingTeam = [
+    {
+      name: "Javonte Carter",
+      role: "Team Lead",
+      bio: "Computer Science graduate student from Fort Pierce, Florida.",
+      imageSrc: "/assets/images/javonte.png",
+      linkedinUrl: "https://www.linkedin.com/in/javonte-carter/",
+    },
+    {
+      name: "Bengisu Kazazlar",
+      role: "Solutions Lead",
+      bio: "Junior Computer Science student from İzmir, Turkey.",
+      imageSrc: "/assets/images/bengi.jpeg",
+      linkedinUrl: "https://www.linkedin.com/in/bengisu-kazazlar/",
+    },
+    {
+      name: "Frank Junior Hoza Longfor",
+      role: "Senior Developer",
+      bio: "Computer Science graduate from Douala, Cameroon.",
+      imageSrc: "/assets/images/junior.png",
+      linkedinUrl: "https://www.linkedin.com/in/frank-junior-hoza-longfor/",
+    },
+    {
+      name: "Alissa Forde",
+      role: "Solutions Developer",
+      bio: "Computer Science student from Orlando, Florida.",
+      imageSrc: "/assets/images/alissa.png",
+      linkedinUrl: "https://www.linkedin.com/in/alissa-forde/",
+    },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -424,55 +455,31 @@ export function HomePage() {
                     Our Founding Team
                   </h2>
                   <div className="grid md:grid-cols-4 gap-8">
-                    <div className="text-center">
-                      <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
-                        JM
+                    {foundingTeam.map((member) => (
+                      <div key={member.name} className="text-center">
+                        <img
+                          src={member.imageSrc}
+                          alt={`${member.name} profile`}
+                          className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-2 border-white/30"
+                        />
+                        <h3 className="text-xl font-semibold mb-1">
+                          {member.name}
+                        </h3>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <p className="text-[#E8F0DC]">{member.role}</p>
+                          <a
+                            href={member.linkedinUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`Visit ${member.name} on LinkedIn`}
+                            className="text-[#E8F0DC] hover:text-white transition-colors"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        </div>
+                        <p className="text-sm text-white/90">{member.bio}</p>
                       </div>
-                      <h3 className="text-xl font-semibold mb-1">
-                        Javonte Carter
-                      </h3>
-                      <p className="text-[#E8F0DC] mb-2">Team Lead</p>
-                      <p className="text-sm text-white/90">
-                        Computer Science graduate student from Fort Pierce,
-                        Florida.
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
-                        KP
-                      </div>
-                      <h3 className="text-xl font-semibold mb-1">
-                        Bengisu Kazazlar
-                      </h3>
-                      <p className="text-[#E8F0DC] mb-2">Solutions Lead</p>
-                      <p className="text-sm text-white/90">
-                        Junior Computer Science student from İzmir, Turkey.
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
-                        SL
-                      </div>
-                      <h3 className="text-xl font-semibold mb-1">
-                        Frank Junior Hoza Longfor
-                      </h3>
-                      <p className="text-[#E8F0DC] mb-2">Senior Developer</p>
-                      <p className="text-sm text-white/90">
-                        Computer Science graduate from Douala, Cameroon.
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
-                        MC
-                      </div>
-                      <h3 className="text-xl font-semibold mb-1">
-                        Alissa Forde
-                      </h3>
-                      <p className="text-[#E8F0DC] mb-2">Solutions Developer</p>
-                      <p className="text-sm text-white/90">
-                        Computer Science student from Orlando, Florida.
-                      </p>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
