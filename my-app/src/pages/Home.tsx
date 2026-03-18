@@ -62,14 +62,14 @@ export function HomePage() {
       role: "Solutions Lead",
       bio: "Junior Computer Science student from İzmir, Turkey.",
       imageSrc: "/assets/images/bengi.jpeg",
-      linkedinUrl: "https://www.linkedin.com/in/bengisu-kazazlar/",
+      linkedinUrl: "https://www.linkedin.com/in/bengisukazazlar/",
     },
     {
       name: "Frank Junior Hoza Longfor",
       role: "Senior Developer",
       bio: "Computer Science graduate from Douala, Cameroon.",
       imageSrc: "/assets/images/junior.png",
-      linkedinUrl: "https://www.linkedin.com/in/frank-junior-hoza-longfor/",
+      linkedinUrl: "https://www.linkedin.com/in/hoza-junior/",
     },
     {
       name: "Alissa Forde",
@@ -79,6 +79,7 @@ export function HomePage() {
       linkedinUrl: "https://www.linkedin.com/in/alissa-forde/",
     },
   ];
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
