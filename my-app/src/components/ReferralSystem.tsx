@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { UserRound, Stethoscope, Mail } from "lucide-react";
 import { Button } from "./ui/button";
+import { apiUrl } from "../config/api";
 
 export function ReferralSystem() {
   const [specialists, setSpecialists] = useState<any[]>([]);
@@ -10,7 +11,7 @@ export function ReferralSystem() {
   useEffect(() => {
     const fetchSpecialists = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/v1/api/specialists/", {
+        const res = await fetch(apiUrl("specialists/"), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();

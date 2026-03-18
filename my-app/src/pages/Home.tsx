@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { data, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import { apiUrl } from "../config/api";
+import { notify } from "../lib/notifications";
 import { Button } from "../components/ui/button";
 import {
   Tabs,
@@ -55,7 +57,7 @@ export function HomePage() {
           // --- STEP 1: INITIAL LOGIN (Check Email/Password) ---
           // FIX: Change 'verify-otp' to 'login' here
           const response = await fetch(
-            "http://127.0.0.1:8000/v1/api/authentication/login/",
+            apiUrl("authentication/login/"),
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -68,14 +70,14 @@ export function HomePage() {
             // Success! Now we have the otp_uuid to use in the next step
             setOtpUuid(result.otp_uuid);
             setOtpStep(true);
-            console.log("Password accepted. OTP sent to email.");
+            notify.info("Password accepted. OTP sent to your email.");
           } else {
-            alert(result.message || "Login failed");
+            notify.error(result.message || "Login failed");
           }
         } else {
           // --- STEP 2: VERIFY OTP (Final Token Exchange) ---
           const response = await fetch(
-            "http://127.0.0.1:8000/v1/api/authentication/verify-otp/",
+            apiUrl("authentication/verify-otp/"),
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -90,10 +92,11 @@ export function HomePage() {
           if (response.ok) {
             console.log("Verified! Token:", result.access_token);
             login(result.access_token, result.user);
+            notify.success("Login successful.");
             setShowLogin(false);
             navigate("/dashboard");
           } else {
-            alert(result.message || "Invalid OTP code");
+            notify.error(result.message || "Invalid OTP code");
           }
         }
       } else {
@@ -109,16 +112,16 @@ export function HomePage() {
           emergencyName,
           emergencyPhone,
         });
-        alert("Registration successful! Check your email for an OTP.");
+        notify.success("Registration successful. Check your email for an OTP.");
         setIsLogin(true);
       }
     } catch (error) {
       console.error("Auth Error:", error);
 
       if (error instanceof Error) {
-        alert(`Auth error: ${error.message}`);
+        notify.error(`Auth error: ${error.message}`);
       } else {
-        alert("Unknown auth error occurred.");
+        notify.warning("Unknown auth error occurred.");
       }
     }
   };

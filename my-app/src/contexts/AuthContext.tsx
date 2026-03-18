@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { apiUrl } from "../config/api";
 
 interface User {
   id: number;
@@ -47,25 +48,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signup = async (data: RegisterData) => {
-    const response = await fetch(
-      "http://127.0.0.1:8000/v1/api/authentication/register/",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          first_name: data.name.split(" ")[0], // Django User model requires first_name
-          last_name: data.name.split(" ").slice(1).join(" "),
-          email: data.email,
-          password: data.password,
-          date_of_birth: data.dob, // Maps to PatientProfile
-          gender: data.gender,
-          height_cm: data.heightCm,
-          insurance_status: data.insuranceStatus, // Matches INSURANCE_STATUS_CHOICES
-          emergency_contact_name: data.emergencyName,
-          emergency_contact_phone: data.emergencyPhone,
-        }),
-      },
-    );
+    const response = await fetch(apiUrl("authentication/register/"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: data.name.split(" ")[0], // Django User model requires first_name
+        last_name: data.name.split(" ").slice(1).join(" "),
+        email: data.email,
+        password: data.password,
+        date_of_birth: data.dob, // Maps to PatientProfile
+        gender: data.gender,
+        height_cm: data.heightCm,
+        insurance_status: data.insuranceStatus, // Matches INSURANCE_STATUS_CHOICES
+        emergency_contact_name: data.emergencyName,
+        emergency_contact_phone: data.emergencyPhone,
+      }),
+    });
 
     const result = await response.json();
 

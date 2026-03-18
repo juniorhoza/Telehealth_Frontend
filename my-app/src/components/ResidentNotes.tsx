@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { MessageSquare, Clock } from "lucide-react";
+import { apiUrl } from "../config/api";
 
 interface Note {
   uuid: string;
@@ -25,7 +26,7 @@ export function ResidentNotes({ residentUuid }: { residentUuid?: string }) {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/v1/api/doctor/residents/${residentUuid}/note/`,
+          apiUrl(`doctor/residents/${residentUuid}/note/`),
           {
             headers: {
               Authorization: `Bearer ${token}`,

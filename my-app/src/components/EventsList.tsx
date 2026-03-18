@@ -9,6 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Calendar, Clock, Users, CheckCircle2 } from "lucide-react";
+import { apiUrl } from "../config/api";
 
 interface Event {
   id: string;
@@ -22,12 +23,10 @@ interface Event {
   enrollmentUuid?: string | null;
 }
 
-const API_BASE = "http://127.0.0.1:8000/v1/api";
-
 // Keep these easy to swap if your backend uses slightly different paths
-const ENROLL_CREATE_URL = `${API_BASE}/my-enrollments/`; // POST
+const ENROLL_CREATE_URL = apiUrl("my-enrollments/"); // POST
 const ENROLL_DELETE_URL = (enrollmentUuid: string) =>
-  `${API_BASE}/my-enrollments/${enrollmentUuid}/`; // DELETE
+  apiUrl(`my-enrollments/${enrollmentUuid}/`); // DELETE
 
 const MOCK_EVENTS: Event[] = [
   {
@@ -168,8 +167,8 @@ export function EventsList() {
 
     try {
       const [programsRes, enrollmentsRes] = await Promise.all([
-        fetch(`${API_BASE}/programs/`, { headers: authHeaders }),
-        fetch(`${API_BASE}/my-enrollments/`, { headers: authHeaders }),
+        fetch(apiUrl("programs/"), { headers: authHeaders }),
+        fetch(apiUrl("my-enrollments/"), { headers: authHeaders }),
       ]);
 
       if (!programsRes.ok) {

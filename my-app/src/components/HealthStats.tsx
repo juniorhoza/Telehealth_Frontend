@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Activity, Scale, Ruler } from "lucide-react";
+import { apiUrl } from "../config/api";
 
 interface HealthTrackingEntry {
   uuid: string;
@@ -33,7 +34,7 @@ export function HealthStats() {
 
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/v1/api/health-tracking/summary/",
+          apiUrl("health-tracking/summary/"),
           {
             headers: { Authorization: `Bearer ${token}` },
           },

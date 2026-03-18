@@ -16,6 +16,7 @@ import { CenterHours } from "../components/CenterHours";
 import { ReferralSystem } from "../components/ReferralSystem";
 import { ResidentNotes } from "../components/ResidentNotes";
 import { DashboardOverview } from "../components/DashboardOverview";
+import { apiUrl } from "../config/api";
 import {
   Heart,
   LogOut,
@@ -46,7 +47,7 @@ export function Dashboard() {
       try {
         console.log("Sending Token:", token);
 
-        const userRes = await fetch("http://127.0.0.1:8000/v1/api/users/me/", {
+        const userRes = await fetch(apiUrl("users/me/"), {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

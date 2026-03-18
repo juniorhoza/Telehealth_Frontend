@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiUrl } from "../config/api";
 
 export function MyClasses() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
@@ -8,7 +9,7 @@ export function MyClasses() {
     const fetchMyClasses = async () => {
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/v1/api/my-enrollments/",
+          apiUrl("my-enrollments/"),
           {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           },
